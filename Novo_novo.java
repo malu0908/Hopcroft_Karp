@@ -5,13 +5,13 @@ public class Teste {
 	private final int NIL = 0;
 	private final int INF = Integer.MAX_VALUE;
 	private ArrayList<Integer>[] Adj;
-	private int qtd = 100;
+	private int qtd = 12;
 	private int[] Group = new int[qtd];
 	private int[] Dist = new int[qtd];
 	private boolean[] notFree = new boolean[qtd];
 	private int[][] m = new int[qtd][qtd];
 
-	public boolean BFS(){
+	public boolean BFS() {
 
 		Queue<Integer> queue = new LinkedList<Integer>();
 
@@ -26,7 +26,7 @@ public class Teste {
 
 		Dist[NIL] = INF;
 
-		while (!queue.isEmpty()){
+		while (!queue.isEmpty()) {
 
 			int v = queue.poll();
 
@@ -49,16 +49,14 @@ public class Teste {
 						Group[u] = v;
 						Group[v] = u;
 
+						Group[v + (qtd / 2)] = u - qtd / 2;
+						Group[u - (qtd / 2)] = v + qtd / 2;
+
 						notFree[u] = true;
 						notFree[v] = true;
 
-						if (v < qtd / 2) {
-							Group[v + (qtd /2)] = u - qtd/2;
-							notFree[v + (qtd / 2)] = true;
-							
-							Group[u - (qtd/2)] = v + qtd/2;
-							notFree[u - (qtd/2)] = true;
-						}
+						notFree[v + (qtd / 2)] = true;
+						notFree[u - (qtd / 2)] = true;
 
 						return true;
 					}
@@ -93,7 +91,7 @@ public class Teste {
 				String[] info = linha.split(",");
 				for (int w = 0; w < Integer.parseInt(qtd); w++) {
 					if (Integer.parseInt(info[w]) == 1) {
-						Adj[i].add(w);						
+						Adj[i].add(w);
 					}
 				}
 				linha = lerArq.readLine();
