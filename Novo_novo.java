@@ -6,73 +6,67 @@ public class Teste {
 	private final int INF = Integer.MAX_VALUE;
 	private ArrayList<Integer>[] Adj;
 	private int qtd = 12;
-	private int[] Group = new int[qtd];
-	private int[] Dist = new int[qtd];
-	private boolean[] notFree = new boolean[qtd];
+	private int[] Group1 = new int[qtd / 2];
+	private int[] Group2 = new int[qtd / 2];
+	private int[] Dist = new int[qtd/2];
 	private int[][] m = new int[qtd][qtd];
 
 	public boolean BFS() {
 
+		int k = INF;
 		Queue<Integer> queue = new LinkedList<Integer>();
 
-		for (int v = 1; v < qtd; v++)
-			if (Group[v] == NIL) {
+		for (int v = 0; v < Group1.length; v++)
+			if (Group1[v] == v) {
 				Dist[v] = 0;
 				queue.add(v);
-			}
-
-			else
+			} else
 				Dist[v] = INF;
-
-		Dist[NIL] = INF;
 
 		while (!queue.isEmpty()) {
 
-			int v = queue.poll();
+			int u = queue.poll();
 
-			if (Dist[v] < Dist[NIL])
-				for (int u : Adj[v])
-					if (Dist[Group[u]] == INF) {
-						Dist[Group[u]] = Dist[v] + 1;
-						queue.add(Group[u]);
+			if (Dist[u] < k)
+				for (int v : Adj[u])
+					if (v == Group2[v] && k == INF)
+						k = Dist[u] + 1;
+					else if (Dist[Group2[u]] == INF) {
+						Dist[Group2[v]] = Dist[v] + 1;
+						queue.add(Group2[v]);
 					}
 		}
 
-		return Dist[NIL] != INF;
+		return k != INF;
 	}
 
 	public boolean DFS(int v) {
-		if (v != NIL) {
-			for (int u : Adj[v])
-				if (Dist[Group[u]] == Dist[v] + 1 && notFree[u] == false && notFree[v] == false)
-					if (DFS(Group[u])) {
-						Group[u] = v;
-						Group[v] = u;
-
-						Group[v + (qtd / 2)] = u - qtd / 2;
-						Group[u - (qtd / 2)] = v + qtd / 2;
-
-						notFree[u] = true;
-						notFree[v] = true;
-
-						notFree[v + (qtd / 2)] = true;
-						notFree[u - (qtd / 2)] = true;
-
-						return true;
-					}
-
-			Dist[v] = INF;
-			return false;
+		for (int u : Adj[v]) {
+			if (Group2[u] == u) {
+				Group1[v] = u;
+				Group2[u] = v;
+				return true;
+			}
+			if (Dist[Group2[u]] == Dist[v] + 1) {
+				if (DFS(Group2[v]) == true) {
+					Group1[v] = u;
+					Group2[u] = v;
+					return true;
+				}
+			}
 		}
-		return true;
+		Dist[v] = INF;
+		return false;
 	}
 
 	public void HopcroftKarp() {
 		Dist = new int[qtd];
-		while (BFS())
-			for (int v = 1; v < qtd; v++)
-				if (Group[v] == NIL)
-					DFS(v);
+		boolean resp = BFS();
+		while (resp == true) {
+			for (int v = 0; v < Group1.length; v++)
+				DFS(v);
+			resp = BFS();
+		}
 	}
 
 	public void makeGraph() throws IOException {
@@ -91,7 +85,10 @@ public class Teste {
 				String[] info = linha.split(",");
 				for (int w = 0; w < Integer.parseInt(qtd); w++) {
 					if (Integer.parseInt(info[w]) == 1) {
-						Adj[i].add(w);
+						if (w >= Integer.parseInt(qtd) / 2)
+							Adj[i].add(w - Integer.parseInt(qtd) / 2);
+						else
+							Adj[i].add(w);
 					}
 				}
 				linha = lerArq.readLine();
@@ -126,12 +123,17 @@ public class Teste {
 
 	public static void main(String[] args) throws IOException {
 		Teste a = new Teste();
+		for (int i = 1; i < a.Group1.length; i++) {
+			a.Group1[i] = i;
+			a.Group2[i] = i;
+		}
+
 		boolean fazAlgoritmo = true;
 		if (fazAlgoritmo) {
 			a.makeGraph();
 			a.HopcroftKarp();
-			for (int i = 0; i < a.qtd; i++) {
-				System.out.println("(" + (i) + "," + (a.Group[i]) + ")");
+			for (int i = 0; i < a.Group1.length; i++) {
+				System.out.println("(" + (i) + "," + (a.Group1[i]) + ")");
 			}
 		} else {
 			a.montaMatriz();
